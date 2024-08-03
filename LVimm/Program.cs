@@ -14,6 +14,11 @@ public class Game
     public string Name { get; set; }
 
     public string System { get; set; }
+    public string Region { get; set; }
+    public string Version { get; set; }
+    public string Lng { get; set; }
+    public string Rating { get; set; }
+    public long size { get; set; }
     public int Id { get; set; }
     public string IId { get; set; }
     public string mediaId { get; set; }
@@ -63,7 +68,7 @@ class Program
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error loading settings: {ex.Message}");
+                //Console.WriteLine($"Error loading settings: {ex.Message}");
             }
         }
         else
@@ -88,7 +93,7 @@ class Program
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error saving settings: {ex.Message}");
+                    //Console.WriteLine($"Error saving settings: {ex.Message}");
                 }
             }
             else
@@ -133,7 +138,7 @@ class Program
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error creating folder for console '{console.Name}': {ex.Message}");
+                //Console.WriteLine($"Error creating folder for console '{console.Name}': {ex.Message}");
             }
         }
     }
@@ -142,7 +147,7 @@ class Program
         Console.Clear();
         Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine("-----------------------------------------");
-        Console.WriteLine("     LGame Downloader | Quick Install    ");
+        Console.WriteLine("  LGame Downloader | Consoles Available  ");
         Console.WriteLine("-----------------------------------------");
         Console.WriteLine("         Access Settings : [0]           ");
         Console.WriteLine("-----------------------------------------");
@@ -191,7 +196,7 @@ class Program
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error fetching or parsing HTML: {ex.Message}");
+            //Console.WriteLine($"Error fetching or parsing HTML: {ex.Message}");
         }
 
         Console.Write("Option >> ");
@@ -217,20 +222,20 @@ class Program
 
     static async Task displayConsoleMenu(string consoleName, string consoleLink)
     {
-        Console.Clear();
         
+        Console.Clear();
+        Console.WriteLine("-----------------------------------------");
+        Console.WriteLine($"LGame Downloader | {consoleName} Games");
+        Console.WriteLine("-----------------------------------------");
+        Console.WriteLine($"Current Game Folder: {gamePath}");
+        Console.WriteLine("[0] Back to Consoles Menu");
+        Console.WriteLine($"Searching data for {consoleName}...Games Found: [x{gameIndex}] ");
         gameIndex = 0;
         totalSize = 0;
         estimatedExtraSize = 0;
         gameSizes.Clear();
         games.Clear();
-        Console.Clear();
-        Console.WriteLine("-----------------------------------------");
-        Console.WriteLine("     LGame Downloader | Quick Install    ");
-        Console.WriteLine("-----------------------------------------");
-        Console.WriteLine($"Current Game Folder: {gamePath}");
-        Console.WriteLine("[0] Back to Consoles Menu");
-        Console.WriteLine($"Searching data for {consoleName}...");
+        
 
         // Construct the URL correctly
         string url = $"https://vimm.net{consoleLink}";
@@ -263,11 +268,26 @@ class Program
 
                         // Create and add the task to the list
                         tasks.Add(ScrapeAndPrintGameDetails(httpClient, itemLink, consoleName));
+                        
                     }
                 }
 
                 // Run all tasks concurrently
                 await Task.WhenAll(tasks);
+                var sortedGames = games.OrderBy(game => game.Name);
+                Console.Clear();
+                Console.WriteLine("-----------------------------------------");
+                Console.WriteLine($"LGame Downloader | {consoleName} Games");
+                Console.WriteLine("-----------------------------------------");
+                Console.WriteLine($"Current Game Folder: {gamePath}");
+                Console.WriteLine("[0] Back to Consoles Menu");
+                Console.WriteLine();
+                Console.WriteLine($"Games Found: [{games.Count}]");
+                Console.WriteLine();
+                foreach (var game in sortedGames)
+                {
+                    Console.WriteLine($"[{game.Id}] {game.Name} | {game.Region} | {game.Version} | {game.Lng} | {game.Rating} | Size: {ParseBytesToSize(game.size)}");
+                }
             }
             else
             {
@@ -280,7 +300,7 @@ class Program
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error fetching or parsing HTML: {ex.Message} url used: {url}");
+            //Console.WriteLine($"Error fetching or parsing HTML: {ex.Message} url used: {url}");
         }
         estimatedExtraSize = (long)Queryable.Average(gameSizes.AsQueryable()) * gameIndex;
         Console.WriteLine($"Total Size : {ParseBytesToSize(totalSize)} + {ParseBytesToSize(estimatedExtraSize)} : {ParseBytesToSize(totalSize+estimatedExtraSize)}");
@@ -474,9 +494,14 @@ class Program
                         games.Add(new Game
                         {
                             Name = title,
+                            Region = region,
+                            Version = version,
+                            Lng = languages,
+                            Rating = rating,
                             System = consoleName,
                             Id = gameIndex,
                             mediaId = mediaId,
+                            size = size,
                             alt = alt,
                             IId = href
                         });
@@ -486,15 +511,21 @@ class Program
                         {
                             gameSizes.Add(size);
                         }
-                        
-                        Console.WriteLine($"[{gameIndex}] {title} | {region} | {version} | {languages} | {rating} | Size: {fSize}");
+                        Console.Clear();
+                        Console.WriteLine("-----------------------------------------");
+                        Console.WriteLine($"LGame Downloader | {consoleName} Games");
+                        Console.WriteLine("-----------------------------------------");
+                        Console.WriteLine($"Current Game Folder: {gamePath}");
+                        Console.WriteLine("[0] Back to Consoles Menu");
+                        Console.WriteLine($"Searching data for {consoleName}...Games Found: [x{gameIndex}] ");
+                        //Console.WriteLine($"[{gameIndex}] {title} | {region} | {version} | {languages} | {rating} | Size: {fSize}");
                     }
                 }
             }
         }
         catch (Exception ex)
         {
-            //Console.WriteLine($"Error fetching or parsing game details: {ex.Message} url used: {itemLink}");
+            ////Console.WriteLine($"Error fetching or parsing game details: {ex.Message} url used: {itemLink}");
         }
         
     }
@@ -533,7 +564,7 @@ class Program
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error fetching or parsing details: {ex.Message} url used: {itemLink}");
+            //Console.WriteLine($"Error fetching or parsing details: {ex.Message} url used: {itemLink}");
             return (0, string.Empty, string.Empty);
         }
     }
